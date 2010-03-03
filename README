@@ -1,0 +1,80 @@
+Cassiopeia (0.0.2)
+===================
+
+Yet another custom CAS client/server implementation
+
+Changelog:
+0.0.2 - Added some doc
+
+---------------------------------------------
+ == Installation ==
+
+$ sudo gem install cassiopeia
+
+Add this line to environment.rb:
+config.gem 'cassiopeia'
+
+---------------------------------------------
+ == Client configuration ==
+
+Create a file named config/cassiopeia.yml:
+server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
+service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
+service_id: "test" # Identification of your service (for informational and security purpose)
+
+-- Usage:
+Add this line to application_controller.rb:
+
+ use_cas_authorization
+
+This will force your application to request authorization from cassiopeia server.
+ You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
+
+  cas_require_roles :doctor, :admin
+
+This will raise the Cassiopeia::AccessDeniedException if user try to access this controller. You can rescue from this exception by adding the following to application_controller.rb:
+
+  rescue_from 'Cassiopeia::AccessDeniedException', :with => :access_denied
+
+  def access_denied
+    flash[:notice] = 'Access denied. You dont have permissions to access this page'
+    redirect_to root_path
+  end
+
+---------------------------------------------
+ == Server configuration ==
+Create a file named config/cassiopeia.yml:
+
+# Ticket max lifetime (in minutes)
+ticket_max_lifetime: 5
+
+Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket: 
+
+  def self.up
+    create_table :cas_tickets do |t|
+      t.references :user, :foreign_key => true
+      t.string :identity
+      t.datetime :expires_at
+      t.string :service, :limit=>2400
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :cas_tickets
+  end
+
+Add the following lines to your cas_controller:
+
+  acts_as_cas_controller do |c| 
+    c.ticketClass = CasTicket
+  end
+
+Add the following lines to your CasTicket:
+
+  acts_as_cas_ticket
+  belongs_to :user
+
+===================
+
+Copyright (c) 2010 Waveaccess LLC
