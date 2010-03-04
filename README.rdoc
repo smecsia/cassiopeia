@@ -14,6 +14,7 @@
 == SYNOPSIS:
 = Client configuration
 - Create a file named config/cassiopeia.yml:
+
   server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
   service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
   service_id: "test" # Identification of your service (for informational and security purpose)
