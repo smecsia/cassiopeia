@@ -12,21 +12,17 @@
 
 
 == SYNOPSIS:
-= Client configuration
-- Create a file named config/cassiopeia.yml:
-
+=== Client configuration
+<b>Create a file named config/cassiopeia.yml:</b>
 
   server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
   service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
   service_id: "test" # Identification of your service (for informational and security purpose)
 
-
-<b>Usage:</b>
-- Add this line to application_controller.rb:
-
+==== Usage:
+<b>Add this line to application_controller.rb:</b>
 
   use_cas_authorization
-
 
 This will force your application to request authorization from cassiopeia server.
 You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
@@ -41,7 +37,7 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
     redirect_to root_path
   end
 
-= Server configuration
+=== Server configuration
 - Create a file named config/cassiopeia.yml:
 
 
