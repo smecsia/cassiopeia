@@ -12,7 +12,8 @@ module Cassiopeia
     :server_url => "https://localhost/cassiopeia",
     :service_url => "https://localhost/test_rails",
     :service_id => "test",
-    :current_user_key => "current_user"
+    :current_user_key => "current_user",
+    :format => "js"
   }
   CONFIG_PATH = "#{RAILS_ROOT}/config/cassiopeia.yml"
   @@conf = {}

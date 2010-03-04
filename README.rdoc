@@ -7,6 +7,7 @@
 - Yet another custom CAS client/server implementation
 
 = Changelog:
+- 0.0.4: Fixed problem with default config
 - 0.0.3: Added required dependency simple_rest. Doc extended.
 - 0.0.2: Added some doc
 
