@@ -20,11 +20,16 @@
 
 <b>Usage:</b>
 - Add this line to application_controller.rb:
+
   use_cas_authorization
+
 This will force your application to request authorization from cassiopeia server.
 You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
+
   cas_require_roles :doctor, :admin
+
 This will raise the Cassiopeia::AccessDeniedException if user try to access this controller. You can rescue from this exception by adding the following to application_controller.rb:
+
   rescue_from 'Cassiopeia::AccessDeniedException', :with => :access_denied
   def access_denied
     flash[:notice] = 'Access denied. You dont have permissions to access this page'
@@ -33,9 +38,11 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
 
 = Server configuration
 - Create a file named config/cassiopeia.yml:
-  # Ticket max lifetime (in minutes)
-  ticket_max_lifetime: 5
+
+  ticket_max_lifetime: 5 # Ticket max lifetime (in minutes)
+
 - Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket (all field are mandatory): 
+
   def self.up
     create_table :cas_tickets do |t|
       t.references :user, :foreign_key => true
@@ -48,15 +55,21 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
   def self.down
     drop_table :cas_tickets
   end
+
 - Add the following lines to your cas_controller:
+
   acts_as_cas_controller do |c| 
     c.ticketClass = CasTicket
     c.rolesMethod = :roles_array #add this line only if your user model doesn't have :roles method
   end
+
 - Add the following lines to your CasTicket:
+
   acts_as_cas_ticket
   belongs_to :user
+
 - You should also provide the ability to extract user roles to array by calling rolesMethod for current user. Add this method to your user model. The example for authlogic:
+
   def roles_array
     res = []
     role_objects.each do |role|
@@ -68,9 +81,11 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
 == INSTALL:
 
 - Add this line to environment.rb:
+
   config.gem 'cassiopeia'
 
 - Run this from console:
+
   rake gems:install
 
 == LICENSE:
