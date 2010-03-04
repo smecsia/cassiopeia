@@ -17,6 +17,12 @@
   server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
   service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
   service_id: "test" # Identification of your service (for informational and security purpose)
+  # additional options and their default values:
+  server_controller: "cas"
+  session_id_key: "cassiopeia_sesion_id"
+  ticket_id_key: "cas_ticket_id"
+  service_id_key: "cas_service_id"
+  service_url_key: "cas_service_url"
 
 ==== Usage:
 <b>Add this line to application_controller.rb:</b>
@@ -36,6 +42,12 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
 === Server configuration
 Create a file named config/cassiopeia.yml:
   ticket_max_lifetime: 5 # Ticket max lifetime (in minutes)
+  # additional options and their default values:
+  session_id_key: "cassiopeia_sesion_id"
+  ticket_id_key: "cas_ticket_id"
+  service_id_key: "cas_service_id"
+  service_url_key: "cas_service_url"
+
 Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket (all field are mandatory): 
   def self.up
     create_table :cas_tickets do |t|
@@ -65,6 +77,11 @@ You should also provide the ability to extract user roles to array by calling ro
     end
     res
   end
+One more thing that might be useful to make everything work properly. Add these lines to routes.rb:
+  map.resource :cas
+  map.root :controller => "cas", :action => :index
+  map.connect ':controller/:action.:format'
+ 
 
 == INSTALL:
 
