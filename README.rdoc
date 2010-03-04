@@ -14,17 +14,19 @@
 == SYNOPSIS:
 = Client configuration
 - Create a file named config/cassiopeia.yml:
-<tt>
+
+
   server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
   service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
   service_id: "test" # Identification of your service (for informational and security purpose)
-</tt>
+
 
 <b>Usage:</b>
 - Add this line to application_controller.rb:
-<tt>
+
+
   use_cas_authorization
-</tt>
+
 
 This will force your application to request authorization from cassiopeia server.
 You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
@@ -41,9 +43,10 @@ This will raise the Cassiopeia::AccessDeniedException if user try to access this
 
 = Server configuration
 - Create a file named config/cassiopeia.yml:
-<tt>
+
+
   ticket_max_lifetime: 5 # Ticket max lifetime (in minutes)
-</tt>
+
 
 - Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket (all field are mandatory): 
 
