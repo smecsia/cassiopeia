@@ -34,8 +34,8 @@ This will force your application to request authorization from cassiopeia server
 You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
   cas_require_roles :doctor, :admin
 
-This will raise the Cassiopeia::AccessDeniedException if user try to access this controller. You can rescue from this exception by adding the following to application_controller.rb:
-  rescue_from 'Cassiopeia::AccessDeniedException', :with => :access_denied
+This will raise the Cassiopeia::Exception::AccessDenied if user try to access this controller. You can rescue from this exception by adding the following to application_controller.rb:
+  rescue_from 'Cassiopeia::Exception::AccessDenied', :with => :access_denied
   def access_denied
     flash[:notice] = 'Access denied. You dont have permissions to access this page'
     redirect_to root_path
