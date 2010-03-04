@@ -10,13 +10,13 @@ module Cassiopeia
         @@ticketClass = c
       end
       def cas_ticket_id
-        session[@ticket_id_key] || params[@ticket_id_key]
+        params[@ticket_id_key] || session[@ticket_id_key]
       end
       def cas_service_url
-        session[@service_url_key] || params[@service_url_key]
+        params[@service_url_key] || session[@service_url_key]
       end
       def cas_service_id
-        session[@service_id_key] || params[@service_id_key]
+        params[@service_id_key] || session[@service_id_key]
       end
 
       def cas_require_config
@@ -93,20 +93,25 @@ module Cassiopeia
         end
       end
 
+      def cas_redirect_to(url)
+        raise Cassiopeia::InvalidUrlException.new "Cannot detect url for redirection! Please, check configuration." unless url 
+        redirect_to url
+      end
+
       def cas_proceed_auth
         if cas_current_ticket_valid? && current_user
           logger.debug "\nCurrentTicketValid, current_user exists redirecting to service...\n" + "="*50
-          return redirect_to Cassiopeia::Server::instance.service_url(session)
+          return cas_redirect_to Cassiopeia::Server::instance.service_url(session)
         elsif current_user
           logger.debug "\nCurrentTicketInvalid, but current_user exists, should create new ticket...\n" + "="*50
           cas_current_ticket.destroy
           cas_create_or_find_ticket
-          return redirect_to Cassiopeia::Server::instance.service_url(session)
+          return cas_redirect_to Cassiopeia::Server::instance.service_url(session)
         elsif cas_current_ticket_exists?
           logger.debug "\nCurrentTicketInvalid, but current_user exists, destroying ticket, redirecting to login...\n" + "="*50
           cas_current_ticket.destroy
         end
-        redirect_to login_url
+        cas_redirect_to login_url
       end
 
       def create
