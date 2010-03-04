@@ -20,7 +20,9 @@ module Cassiopeia
       end
 
       def cas_require_config
-        raise "ticketClass should be set to use this functionality" unless @@ticketClass
+        unless @@ticketClass
+          raise ConfigRequired.new "ticketClass should be set to use this functionality"
+        end
       end
 
       def cas_store_params
@@ -94,7 +96,10 @@ module Cassiopeia
       end
 
       def cas_redirect_to(url)
-        raise Cassiopeia::Exception::InvalidUrl.new "Cannot detect url for redirection! Please, check configuration." unless url 
+        unless url
+          logger.debug "\n Cannot detect url (params = #{params.to_json}, session = #{session.to_json} \n" + "="*50
+          raise Cassiopeia::Exception::InvalidUrl.new "Cannot detect url for redirection! Please, check configuration."
+        end
         redirect_to url
       end
 

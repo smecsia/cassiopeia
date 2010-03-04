@@ -16,6 +16,8 @@ module Cassiopeia
   end
 
   module Exception
+    class ConfigRequired < Object::Exception
+    end
     class AccessDenied < Object::Exception
     end
     class InvalidUrl < Object::Exception
