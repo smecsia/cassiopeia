@@ -16,9 +16,9 @@ module Cassiopeia
   end
 
   module Exception
-    class AccessDenied < Exception
+    class AccessDenied < Object::Exception
     end
-    class InvalidUrl < Exception
+    class InvalidUrl < Object::Exception
     end
   end
 end
