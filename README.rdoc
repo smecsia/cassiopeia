@@ -87,9 +87,10 @@ One more thing that might be useful to make everything work properly. Add these 
 
 == INSTALL:
 
-=== Add this line to environment.rb:
+=== Add these lines to environment.rb:
 
   config.gem 'cassiopeia'
+  config.gem 'simple_rest'
 
 === Run this from console:
 
