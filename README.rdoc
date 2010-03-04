@@ -1,0 +1,101 @@
+= cassiopeia
+
+* http://github.com/smecsia/cassiopeia
+
+== DESCRIPTION:
+
+Yet another custom CAS client/server implementation
+
+Changelog:
+0.0.3 - Added required dependency simple_rest. Doc extended.
+0.0.2 - Added some doc
+
+
+== SYNOPSIS:
+= Client configuration
+Create a file named config/cassiopeia.yml:
+  server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
+  service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
+  service_id: "test" # Identification of your service (for informational and security purpose)
+
+*Usage:*
+Add this line to application_controller.rb:
+  use_cas_authorization
+This will force your application to request authorization from cassiopeia server.
+You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
+  cas_require_roles :doctor, :admin
+This will raise the Cassiopeia::AccessDeniedException if user try to access this controller. You can rescue from this exception by adding the following to application_controller.rb:
+  rescue_from 'Cassiopeia::AccessDeniedException', :with => :access_denied
+  def access_denied
+    flash[:notice] = 'Access denied. You dont have permissions to access this page'
+    redirect_to root_path
+  end
+
+= Server configuration
+Create a file named config/cassiopeia.yml:
+  # Ticket max lifetime (in minutes)
+  ticket_max_lifetime: 5
+Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket (all field are mandatory): 
+  def self.up
+    create_table :cas_tickets do |t|
+      t.references :user, :foreign_key => true
+      t.string :identity
+      t.datetime :expires_at
+      t.string :service, :limit=>2400
+      t.timestamps
+    end
+  end
+  def self.down
+    drop_table :cas_tickets
+  end
+Add the following lines to your cas_controller:
+  acts_as_cas_controller do |c| 
+    c.ticketClass = CasTicket
+    c.rolesMethod = :roles_array #add this line only if your user model doesn't have :roles method
+  end
+Add the following lines to your CasTicket:
+  acts_as_cas_ticket
+  belongs_to :user
+You should also provide the ability to extract user roles to array by calling rolesMethod for current user. 
+Add this method to your user model. The example for authlogic:
+  def roles_array
+    res = []
+    role_objects.each do |role|
+      res << role.name.to_sym
+    end
+    res
+  end
+
+== INSTALL:
+
+Add this line to environment.rb:
+  config.gem 'cassiopeia'
+
+Run this from console:
+  rake gems:install
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2010 smecsia
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
