@@ -43,7 +43,7 @@ module Cassiopeia
         if cas_required_roles
           logger.debug "\nCas check required roles #{cas_required_roles}...\n" + "="*50
           cas_required_roles.each do |r|
-            raise Cassiopeia::AccessDeniedException.new "You don't have required roles for this controller" unless current_user.has_role? r
+            raise Cassiopeia::Exception::AccessDenied.new "You don't have required roles for this controller" unless current_user.has_role? r
           end
         end
       end

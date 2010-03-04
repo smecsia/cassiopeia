@@ -15,6 +15,10 @@ module Cassiopeia
     end
   end
 
-  class AccessDeniedException < Exception
+  module Exception
+    class AccessDenied < Exception
+    end
+    class InvalidUrl < Exception
+    end
   end
 end

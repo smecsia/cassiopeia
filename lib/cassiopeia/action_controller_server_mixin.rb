@@ -94,7 +94,7 @@ module Cassiopeia
       end
 
       def cas_redirect_to(url)
-        raise Cassiopeia::InvalidUrlException.new "Cannot detect url for redirection! Please, check configuration." unless url 
+        raise Cassiopeia::Exception::InvalidUrl.new "Cannot detect url for redirection! Please, check configuration." unless url 
         redirect_to url
       end
 

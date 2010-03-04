@@ -4,7 +4,7 @@ module Cassiopeia
   VERSION = '0.0.1'
   autoload :User, 'cassiopeia/user'
   autoload :Base, 'cassiopeia/base'
-  autoload :AccessDeniedException, 'cassiopeia/base'
+  autoload :Exception, 'cassiopeia/base'
   autoload :Server, 'cassiopeia/server'
   autoload :Client, 'cassiopeia/client'
   autoload :CONFIG, 'cassiopeia/config'
