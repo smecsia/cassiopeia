@@ -1,5 +1,7 @@
 module Cassiopeia
   class Server < Base
+    SERVICE_KEY = Cassiopeia::CONFIG[:service_url_key]
+    TICKET_KEY = Cassiopeia::CONFIG[:ticket_id_key]
     private
     @instance = nil
     def cas_data(session)
@@ -11,8 +13,6 @@ module Cassiopeia
     def self.instance
       return @instance if @instance
       @instance = Cassiopeia::Server.new
-      SERVICE_KEY = Cassiopeia::CONFIG[:service_url_key]
-      TICKET_KEY = Cassiopeia::CONFIG[:ticket_id_key]
     end
 
     def service_url(session)
