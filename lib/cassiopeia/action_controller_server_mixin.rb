@@ -51,8 +51,7 @@ module Cassiopeia
       end
 
       def cas_current_ticket_exists?
-        logger.debug "\nTicketExists = #{Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id)}\n" + "="*50
-        Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id)
+        Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id) if cas_ticket_id > ""
       end
 
       def cas_current_ticket_valid?
@@ -78,9 +77,7 @@ module Cassiopeia
       end
 
       def cas_process_request
-        if current_user
-          cas_respond_current_ticket
-        elsif cas_current_ticket_exists?
+        if current_user || cas_current_ticket_exists?
           cas_respond_current_ticket
         else
           @res = {:error => "Ticket not found"}
@@ -130,7 +127,7 @@ module Cassiopeia
       end
     end
     def acts_as_cas_controller
-      defaultTicketClass = Ticket if defined? Ticket
+      defaultTicketClass = (defined? Ticket)?Ticket:Class
       defaultConfig = {
         :ticketClass => defaultTicketClass, 
         :rolesMethod => :roles
