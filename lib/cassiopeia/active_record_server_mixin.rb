@@ -2,8 +2,8 @@ require 'uuidtools'
 
 module Cassiopeia
   module ActiveRecordServerMixin 
-    def ActiveRecordServerMixin.ticketClass=(c)
-      @@ticketClass = c
+    def self.cassiopeia_ticketClass=(c)
+      @@cassiopeia_ticketClass = c
     end
     # cas ticket
     def acts_as_cas_ticket
@@ -13,7 +13,7 @@ module Cassiopeia
           (ticket = self.for_service service) && ticket.expires_at >= DateTime.now
         end
         def for_service(service)
-          @@ticketClass.find(:first, :conditions => {:service => service, :user_id => user.id })
+          @@cassiopeia_ticketClass.find(:first, :conditions => {:service => service, :user_id => user.id })
         end
       end
       instance_eval do

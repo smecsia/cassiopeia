@@ -2,9 +2,8 @@ module Cassiopeia
   class TicketsControllerConfig
     attr_accessor :ticketClass
     attr_accessor :rolesMethod
-    def initialize(tClass, rMethod)
-      @ticketClass = tClass
-      @rolesMethod = rMethod
+    def initialize(opts={})
+      @ticketClass, @rolesMethod = opts[:ticketClass], opts[:rolesMethod]
     end
   end
 end

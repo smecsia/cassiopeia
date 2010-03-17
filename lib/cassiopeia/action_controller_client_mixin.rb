@@ -1,6 +1,7 @@
 module Cassiopeia
   module ActionControllerClientMixin
     module ActionControllerMethods
+      private
       ::CAS_USER_KEY = Cassiopeia::CONFIG[:current_user_key]
       ::CAS_TICKET_ID_KEY = Cassiopeia::CONFIG[:ticket_id_key] 
       ::CAS_TICKET_KEY = Cassiopeia::CONFIG[:ticket_key]

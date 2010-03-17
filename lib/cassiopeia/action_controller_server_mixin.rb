@@ -3,12 +3,6 @@ module Cassiopeia
 
   module ActionControllerServerMixin
     module ActionControllerMethods
-      def ActionControllerMethods.rolesMethod=(m)
-        @@rolesMethod = m
-      end
-      def ActionControllerMethods.ticketClass=(c)
-        @@ticketClass = c
-      end
       def cas_ticket_id
         params[@ticket_id_key] || session[@ticket_id_key]
       end
@@ -20,7 +14,7 @@ module Cassiopeia
       end
 
       def cas_require_config
-        unless @@ticketClass
+        unless Cassiopeia::CONFIG[:ticketClass]
           raise ConfigRequired.new "ticketClass should be set to use this functionality"
         end
       end
@@ -36,7 +30,7 @@ module Cassiopeia
 
       def cas_create_or_find_ticket
         if current_user && !(cas_current_ticket_exists?) 
-          @ticket = @@ticketClass.new(:user_id => current_user.id)
+          @ticket = Cassiopeia::CONFIG[:ticketClass].new(:user_id => current_user.id)
           @ticket.user = current_user
           @ticket.service = cas_service_id
           if @ticket.save
@@ -46,20 +40,19 @@ module Cassiopeia
             @ticket = nil
           end
         else
-          @ticket = @@ticketClass.find_by_identity(cas_ticket_id.to_s)
+          @ticket = Cassiopeia::CONFIG[:ticketClass].find_by_identity(cas_ticket_id.to_s)
         end
         @ticket
       end
 
       def cas_current_ticket
         @ticket = cas_create_or_find_ticket unless @ticket
-        logger.debug "\nCurrentTicket = #{@ticket.identity if @ticket}\n" + "="*50
         @ticket
       end
 
       def cas_current_ticket_exists?
-        logger.debug "\nTicketExists = #{@@ticketClass.exists?(cas_ticket_id)}\n" + "="*50
-        @@ticketClass.exists?(cas_ticket_id)
+        logger.debug "\nTicketExists = #{Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id)}\n" + "="*50
+        Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id)
       end
 
       def cas_current_ticket_valid?
@@ -72,7 +65,7 @@ module Cassiopeia
         if cas_current_ticket.user
           user_hash = cas_current_ticket.user.attributes
           roles = []
-          roles = (cas_current_ticket.user.send @@rolesMethod) if cas_current_ticket.user.respond_to? @@rolesMethod
+          roles = (cas_current_ticket.user.send Cassiopeia::CONFIG[:rolesMethod]) if cas_current_ticket.user.respond_to? Cassiopeia::CONFIG[:rolesMethod]
           roles_hash = roles
           user_hash[:roles] = roles_hash
         else
@@ -138,11 +131,13 @@ module Cassiopeia
     end
     def acts_as_cas_controller
       defaultTicketClass = Ticket if defined? Ticket
-      controllerConfig = Cassiopeia::TicketsControllerConfig.new defaultTicketClass, :roles
+      defaultConfig = {
+        :ticketClass => defaultTicketClass, 
+        :rolesMethod => :roles
+      }
+      controllerConfig = Cassiopeia::TicketsControllerConfig.new defaultConfig
       yield controllerConfig
-      ActionControllerMethods.rolesMethod = controllerConfig.rolesMethod
-      ActionControllerMethods.ticketClass = controllerConfig.ticketClass
-      ActiveRecordServerMixin.ticketClass = controllerConfig.ticketClass
+      Cassiopeia::CONFIG[:rolesMethod], Cassiopeia::CONFIG[:ticketClass] = controllerConfig.rolesMethod, controllerConfig.ticketClass
       skip_before_filter :verify_authenticity_token, :only=> [:create, :index]
       before_filter :require_user, :except => [:create, :index]
       before_filter :cas_store_params, :cas_create_or_find_ticket, :cas_require_config
