@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-- Yet another custom CAS client/server implementation
+- Yet another custom CAS client/server implementation. This plugin allows you to perform single-server authorization between two different rails applications. 
 
 = Changelog:
 - 0.0.6: Tiny refactoring.
@@ -12,6 +12,18 @@
 - 0.0.4: Fixed problem with default config.
 - 0.0.3: Added required dependency simple_rest. Doc extended.
 - 0.0.2: Added some doc.
+
+
+== INSTALL:
+
+=== Add these lines to environment.rb:
+
+  config.gem 'cassiopeia'
+  config.gem 'simple_rest'
+
+=== Run this from console:
+
+  rake gems:install
 
 
 == SYNOPSIS:
@@ -82,20 +94,11 @@ You should also provide the ability to extract user roles to array by calling ro
   end
 One more thing that might be useful to make everything work properly. Add these lines to routes.rb:
   map.resource :cas
-  map.root :controller => "cas", :action => :index
   map.connect ':controller/:action.:format'
  
+==== Note:
+Server's application controller should has helper method called "current_user".
 
-== INSTALL:
-
-=== Add these lines to environment.rb:
-
-  config.gem 'cassiopeia'
-  config.gem 'simple_rest'
-
-=== Run this from console:
-
-  rake gems:install
 
 == LICENSE:
 

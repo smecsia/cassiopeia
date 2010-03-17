@@ -94,14 +94,15 @@ module Cassiopeia
       end
 
       def cas_proceed_auth
+        service_url = Cassiopeia::Server::instance.service_url(session)
         if cas_current_ticket_valid? && current_user
           logger.debug "\nCurrentTicketValid, current_user exists redirecting to service...\n" + "="*50
-          return cas_redirect_to Cassiopeia::Server::instance.service_url(session)
+          return cas_redirect_to service_url
         elsif current_user
           logger.debug "\nCurrentTicketInvalid, but current_user exists, should create new ticket...\n" + "="*50
-          cas_current_ticket.destroy
+          cas_current_ticket.destroy if cas_current_ticket_exists?
           cas_create_or_find_ticket
-          return cas_redirect_to Cassiopeia::Server::instance.service_url(session)
+          return cas_redirect_to service_url
         elsif cas_current_ticket_exists?
           logger.debug "\nCurrentTicketInvalid, but current_user exists, destroying ticket, redirecting to login...\n" + "="*50
           cas_current_ticket.destroy
@@ -127,7 +128,7 @@ module Cassiopeia
       end
     end
     def acts_as_cas_controller
-      defaultTicketClass = (defined? Ticket)?Ticket:Class
+      defaultTicketClass = ((defined? Ticket)?(Ticket):(Class))
       defaultConfig = {
         :ticketClass => defaultTicketClass, 
         :rolesMethod => :roles
