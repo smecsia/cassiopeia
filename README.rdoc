@@ -7,6 +7,7 @@
 - Yet another custom CAS client/server implementation. This plugin allows you to perform single-server authorization between two different rails applications. 
 
 = Changelog:
+- 0.0.7: Some code for redirection added. Added webpath prefix support.
 - 0.0.6: Tiny refactoring.
 - 0.0.5: Some important fixes for configuration exceptions handling.
 - 0.0.4: Fixed problem with default config.
@@ -29,15 +30,10 @@
 == SYNOPSIS:
 === Client configuration
 <b>Create a file named config/cassiopeia.yml:</b>
-  server_url: "https://localhost/cassiopeia" # Url of cassiopeia server in your environment
-  service_url: "https://localhost/myservice" # Url of your application (for cas to redirect back)
-  service_id: "test" # Identification of your service (for informational and security purpose)
-  # additional options and their default values:
-  server_controller: "cas"
-  session_id_key: "cassiopeia_sesion_id"
-  ticket_id_key: "cas_ticket_id"
-  service_id_key: "cas_service_id"
-  service_url_key: "cas_service_url"
+  server_url: "https://localhost" # Url of cassiopeia server in your environment
+  service_url: "https://localhost/myservice/" # Url of your application (for cas to redirect back)
+  service_id: "myservice" # Identification of your service (for informational and security purpose)
+  webpath_prefix: "/myservice" # This is used just for correct redirection if you use proxy (default: empty)
 
 ==== Usage:
 <b>Add this line to application_controller.rb:</b>
@@ -56,12 +52,7 @@ This will raise the Cassiopeia::Exception::AccessDenied if user try to access th
 
 === Server configuration
 Create a file named config/cassiopeia.yml:
-  ticket_max_lifetime: 5 # Ticket max lifetime (in minutes)
-  # additional options and their default values:
-  session_id_key: "cassiopeia_sesion_id"
-  ticket_id_key: "cas_ticket_id"
-  service_id_key: "cas_service_id"
-  service_url_key: "cas_service_url"
+  ticket_max_lifetime: 5 # Ticket max lifetime (in minutes, default: 120)
 
 Generate new controller named Cas. Generate new model named CasTicket. Create migration for your CasTicket (all field are mandatory): 
   def self.up

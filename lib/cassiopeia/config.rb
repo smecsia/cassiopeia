@@ -10,8 +10,10 @@ module Cassiopeia
     :service_id_key => "cas_service_id",
     :service_url_key => "cas_service_url",
     :server_url => "https://localhost/cassiopeia",
-    :service_url => "https://localhost/test_rails",
-    :service_id => "test",
+    :service_url => "https://localhost/",
+    :webpath_prefix => "",
+    :return_to_key => "cas_return_to",
+    :service_id => "casclient",
     :current_user_key => "current_user",
     :format => "js"
   }
