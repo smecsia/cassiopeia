@@ -94,7 +94,7 @@ module Cassiopeia
       end
 
       def cas_proceed_auth
-        service_url = Cassiopeia::Server::instance.service_url(session)
+        service_url = Cassiopeia::Server::instance.service_url(session, params)
         if cas_current_ticket_valid? && current_user
           logger.debug "\nCurrentTicketValid, current_user exists redirecting to service...\n" + "="*50
           return cas_redirect_to service_url

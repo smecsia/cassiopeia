@@ -35,16 +35,16 @@ module Cassiopeia
       end
       def cas_request_ticket_id
         cas_store_location
-        redirect_to Cassiopeia::Client::instance.cas_check_url(session) 
+        redirect_to Cassiopeia::Client::instance.cas_check_url(session, params) 
       end
       def cas_request_current_user
         session[CAS_TICKET_ID_KEY] = cas_current_ticket_id
-        @ticket = Cassiopeia::Client::instance.cas_current_ticket(session)
+        @ticket = Cassiopeia::Client::instance.cas_current_ticket(session, params)
+        raise Cassiopeia::Exception::AccessDenied.new "Cannot identify current user" unless (@ticket.include? :user)
         @current_user = Cassiopeia::User.new(@ticket[:user])
         logger.debug "\nCurrent user identified (#{@current_user.login}), storing to session\n" + "="*50
         cas_store_current_user(@ticket, @current_user)
-        logger.debug "\nShould redirect user to #{session[:return_to]}\n" + "="*50
-        cas_redirect_back_or_default root_path
+        logger.debug "\nTicket_id is in request, should process the old request... #{session[:return_to]}\n" + "="*50
       end
       def cas_required_roles
         self.class.cas_required_roles if self.class.respond_to? :cas_required_roles 
