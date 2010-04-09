@@ -1,7 +1,7 @@
 $:.unshift(File.dirname(__FILE__)) unless
 $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 module Cassiopeia
-  VERSION = '0.0.8'
+  VERSION = '0.0.9'
   autoload :User, 'cassiopeia/user'
   autoload :Base, 'cassiopeia/base'
   autoload :Exception, 'cassiopeia/base'
@@ -19,7 +19,7 @@ module Cassiopeia
       ActiveRecord::Base.send :extend, ActiveRecordServerMixin
       ActionController::Base.send :extend, ActionControllerClientMixin
       Rails.configuration.middleware.use RackRestoreRequest if CONFIG[:service_id]
-      puts "Cassiopeia 0.0.8 enabled"
+      puts "Cassiopeia 0.0.9 enabled"
     end
   end
 end

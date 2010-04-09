@@ -7,6 +7,8 @@ module Cassiopeia
     CAS_QUERY_STRING_KEY = Cassiopeia::CONFIG[:rack_query_string_key]
     CAS_SAVE_KEYS = Cassiopeia::CONFIG[:rack_save_keys]
     CAS_UNIQUE_REQ_KEY = Cassiopeia::CONFIG[:rack_unique_req_key]
+    CAS_REQ_EXPIRES_AT_KEY = Cassiopeia::CONFIG[:rack_session_store_expires_at_key]
+    CAS_REQ_TIMEOUT = Cassiopeia::CONFIG[:rack_session_store_timeout]
 
     def initialize( app )
       @app = app
@@ -39,13 +41,31 @@ module Cassiopeia
       env[CAS_QUERY_STRING_KEY] && env[CAS_QUERY_STRING_KEY].match(CAS_TICKET_ID_KEY.to_s) && env[CAS_RACK_SESSION_KEY] && env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
     end
 
+    def remove_expired_headers(env)
+      if(env[CAS_RACK_SESSION_KEY] && env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE])
+        stores = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
+        stores.each do |key, store|
+          if store && store[CAS_REQ_EXPIRES_AT_KEY] && store[CAS_REQ_EXPIRES_AT_KEY] >= DateTime.now 
+            stores.delete key
+          end
+        end
+      end
+    end
+
+    def generate_expiration
+        DateTime.now() + CAS_REQ_TIMEOUT / 24.0 / 60.0
+    end
+
     def save_headers(env)
       if(env[CAS_RACK_SESSION_KEY])
+        remove_expired_headers
         req_key = store_req_key(env)
-        env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE] = { req_key => {}}
+        env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE] = {} unless env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
+        store = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
+        store[req_key] = { CAS_REQ_EXPIRES_AT_KEY => generate_expiration }
         env.each do |key,value|
           if env[key] && (key.is_a? String) && (key.match("HTTP_") || CAS_SAVE_KEYS.match(key))
-            env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE][req_key][key] = value
+            store[req_key][key] = value
           end
         end
       end

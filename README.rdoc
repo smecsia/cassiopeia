@@ -7,6 +7,7 @@
 - Yet another custom CAS client/server implementation. This plugin allows you to perform single-server authorization between two different rails applications. 
 
 = Changelog:
+- 0.0.9: The bug with multiple concurrent requests processing fixed.
 - 0.0.8: Full request saving support via rack middleware.
 - 0.0.7: Some code for redirection added. Added webpath prefix support.
 - 0.0.6: Tiny refactoring.

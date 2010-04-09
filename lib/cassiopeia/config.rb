@@ -16,12 +16,14 @@ module Cassiopeia
     :service_id => nil,
     :current_user_key => "current_user",
     :format => "js",
-    :rack_session_store => "cas_rack_session",
-    :rack_session_key => "rack.session",
     :rack_request_uri_key => "REQUEST_URI",
     :rack_query_string_key => "QUERY_STRING",
     :rack_save_keys => "REQUEST_METHOD QUERY_STRING REQUEST_URI",
-    :rack_unique_req_key => "cas_req_key"
+    :rack_session_store => "cas_rack_session",
+    :rack_session_key => "rack.session",
+    :rack_unique_req_key => "cas_req_key",
+    :rack_session_store_timeout => 1,
+    :rack_session_store_expires_at_key => "cas_req_expires"
   }
   CONFIG_PATH = "#{RAILS_ROOT}/config/cassiopeia.yml"
   @@conf = {}
