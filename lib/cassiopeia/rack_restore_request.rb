@@ -58,7 +58,7 @@ module Cassiopeia
 
     def save_headers(env)
       if(env[CAS_RACK_SESSION_KEY])
-        remove_expired_headers
+        remove_expired_headers(env)
         req_key = store_req_key(env)
         env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE] = {} unless env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
         store = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
