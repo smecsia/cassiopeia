@@ -1,74 +1,72 @@
 module Cassiopeia
-  class RackRestoreRequest
-    CAS_RACK_SESSION_STORE = Cassiopeia::CONFIG[:rack_session_store] 
-    CAS_RACK_SESSION_KEY = Cassiopeia::CONFIG[:rack_session_key]
-    CAS_TICKET_ID_KEY = Cassiopeia::CONFIG[:ticket_id_key]
-    CAS_REQUEST_URI_KEY = Cassiopeia::CONFIG[:rack_request_uri_key]
-    CAS_QUERY_STRING_KEY = Cassiopeia::CONFIG[:rack_query_string_key]
-    CAS_SAVE_KEYS = Cassiopeia::CONFIG[:rack_save_keys]
-    CAS_UNIQUE_REQ_KEY = Cassiopeia::CONFIG[:rack_unique_req_key]
-    CAS_REQ_EXPIRES_AT_KEY = Cassiopeia::CONFIG[:rack_session_store_expires_at_key]
-    CAS_REQ_TIMEOUT = Cassiopeia::CONFIG[:rack_session_store_timeout]
-
-    def initialize( app )
-      @app = app
-    end
-
+  class RackRestoreRequest < BaseRack
     def call( env )
-      if restore_headers_required?(env)
-        env = restore_headers(env)
-      else
-        save_headers(env)
-      end
-      @status, @headers, @body = @app.call env
-      [@status, @headers, @body]
-    end
-
-    def query_to_hash(query)
-      CGI.parse(query)
-    end
-
-    def hash_to_query(hash)
-      pairs = []
-      hash.each do |k, vals|
-        vals = [vals] unless vals.kind_of? Array
-        vals.each {|v| pairs << "#{CGI.escape(k.to_s)}=#{(v)?CGI.escape(v.to_s):''}"}
-      end
-      pairs.join("&")
-    end
-
-    def restore_headers_required?(env)
-      env[CAS_QUERY_STRING_KEY] && env[CAS_QUERY_STRING_KEY].match(CAS_TICKET_ID_KEY.to_s) && env[CAS_RACK_SESSION_KEY] && env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
-    end
-
-    def remove_expired_headers(env)
-      if(env[CAS_RACK_SESSION_KEY] && env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE])
-        stores = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
-        stores.each do |key, store|
-          if store && store[CAS_REQ_EXPIRES_AT_KEY] && store[CAS_REQ_EXPIRES_AT_KEY] >= DateTime.now 
-            stores.delete key
-          end
+      if enabled
+        if restore_headers_required?(env)
+          env = restore_old_request(env)
+        elsif store_headers_required?(env)
+          remove_expired_requests
+          store_current_request(env)
         end
       end
+      response(env)
     end
 
-    def generate_expiration
-        DateTime.now() + CAS_REQ_TIMEOUT / 24.0 / 60.0
-    end
-
-    def save_headers(env)
-      if(env[CAS_RACK_SESSION_KEY])
-        remove_expired_headers(env)
-        req_key = store_req_key(env)
-        env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE] = {} unless env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
-        store = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
-        store[req_key] = { CAS_REQ_EXPIRES_AT_KEY => generate_expiration }
+    def store_current_request(env)
+      begin
+        request = CassiopeiaRequest.new({:uid => store_req_key(env), :expires_at => generate_expiration})
+        store = {}
         env.each do |key,value|
           if env[key] && (key.is_a? String) && (key.match("HTTP_") || CAS_SAVE_KEYS.match(key))
-            store[req_key][key] = value
+            store[key] = value
           end
         end
+        request.data = Marshal.dump(store)
+        request.save!
+      rescue Exception => e
+        raise_missconfiguration(e)
       end
+    end
+
+
+    def restore_old_request(env)
+      begin
+        key = restore_req_key(env)
+        request = CassiopeiaRequest.find_by_uid(key)
+        stored_keys = Marshal.load(request.data)
+        stored_keys.each do |key,value|
+          if(key.match(CAS_QUERY_STRING_KEY))
+            add_ticket_id_to_req(env,key,value)
+          else
+            env[key] = value
+          end
+        end
+        request.delete
+      rescue Exception => e
+        raise_missconfiguration(e)
+      end
+      env
+    end
+
+    def remove_expired_requests
+      begin
+        CassiopeiaRequest.delete_all(["expires_at <= ?", Time.now.utc])
+      rescue Exception => e
+        raise_missconfiguration(e)
+      end
+    end
+
+    def store_req_key(env)
+      params = query_to_hash(env[CAS_QUERY_STRING_KEY])
+      params[CAS_UNIQUE_REQ_KEY] = generate_req_key
+      env[CAS_QUERY_STRING_KEY] = hash_to_query(params)
+      params[CAS_UNIQUE_REQ_KEY]
+    end
+
+
+    def restore_req_key(env)
+      newparams = query_to_hash(env[CAS_QUERY_STRING_KEY])
+      newparams[CAS_UNIQUE_REQ_KEY]
     end
 
     def add_ticket_id_to_req(env, key, value)
@@ -77,34 +75,6 @@ module Cassiopeia
       newparams[CAS_TICKET_ID_KEY] = params[CAS_TICKET_ID_KEY]
       newparams.delete CAS_UNIQUE_REQ_KEY
       env[key] = hash_to_query(newparams)
-    end
-
-    def restore_req_key(env)
-      newparams = query_to_hash(env[CAS_QUERY_STRING_KEY])
-      newparams[CAS_UNIQUE_REQ_KEY]
-    end
-
-    def store_req_key(env)
-      params = query_to_hash(env[CAS_QUERY_STRING_KEY])
-      params[CAS_UNIQUE_REQ_KEY] = UUIDTools::UUID.timestamp_create.to_s
-      env[CAS_QUERY_STRING_KEY] = hash_to_query(params)
-      params[CAS_UNIQUE_REQ_KEY]
-    end
-
-    def restore_headers(env)
-      current_req_key = restore_req_key(env)
-      stored_keys = env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE][current_req_key.to_s]
-      if(env[CAS_RACK_SESSION_KEY] && stored_keys)
-        stored_keys.each do |key,value|
-          if(key.match(CAS_QUERY_STRING_KEY))
-            add_ticket_id_to_req(env,key,value)
-          else
-            env[key] = value
-          end
-        end
-        env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE].delete current_req_key.to_s
-      end
-      env
     end
   end
 end

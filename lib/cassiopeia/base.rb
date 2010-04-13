@@ -16,6 +16,8 @@ module Cassiopeia
   end
 
   module Exception
+    class MissConfiguration < Object::Exception
+    end
     class ConfigRequired < Object::Exception
     end
     class AccessDenied < Object::Exception

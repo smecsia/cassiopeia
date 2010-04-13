@@ -5,13 +5,13 @@ module Cassiopeia
       ::CAS_USER_KEY = Cassiopeia::CONFIG[:current_user_key]
       ::CAS_TICKET_ID_KEY = Cassiopeia::CONFIG[:ticket_id_key] 
       ::CAS_TICKET_KEY = Cassiopeia::CONFIG[:ticket_key]
-      ::CAS_WEBPATH_PREFIX = Cassiopeia::CONFIG[:webpath_prefix]
-      ::CAS_RETURN_TO_KEY = Cassiopeia::CONFIG[:return_to_key] 
+      ::CAS_UNIQUE_REQ_KEY = Cassiopeia::CONFIG[:rack_unique_req_key]
       def cas_current_ticket
         session[CAS_TICKET_KEY] || params[CAS_TICKET_KEY]
       end
       def cas_current_ticket_id
-        params[CAS_TICKET_ID_KEY] || session[CAS_TICKET_ID_KEY]
+        return session[CAS_TICKET_ID_KEY] if (params[CAS_TICKET_ID_KEY].nil? || params[CAS_TICKET_ID_KEY].empty?)
+        return params[CAS_TICKET_ID_KEY]
       end
       def cas_store_current_user(ticket, user)
         session[CAS_TICKET_KEY] = ticket
@@ -26,15 +26,8 @@ module Cassiopeia
         logger.debug "\nCurrent ticket valid: #{DateTime.parse(cas_current_ticket[:expires_at])} >= #{DateTime.now}\n" + "="*50 if cas_current_ticket && cas_current_ticket[:expires_at]
         cas_current_ticket && DateTime.parse(cas_current_ticket[:expires_at]) >= DateTime.now if cas_current_ticket && cas_current_ticket[:expires_at]
       end
-      def cas_store_location
-        session[CAS_RETURN_TO_KEY] = "#{CAS_WEBPATH_PREFIX}#{request.request_uri}"
-      end
-      def cas_redirect_back_or_default(default)
-        redirect_to(session[CAS_RETURN_TO_KEY] || default)
-        session[CAS_RETURN_TO_KEY] = nil
-      end
       def cas_request_ticket_id
-        cas_store_location
+        logger.debug "\nStoring current request:...#{params[CAS_UNIQUE_REQ_KEY]} \n" + "="*50
         redirect_to Cassiopeia::Client::instance.cas_check_url(session, params) 
       end
       def cas_request_current_user
@@ -44,7 +37,7 @@ module Cassiopeia
         @current_user = Cassiopeia::User.new(@ticket[:user])
         logger.debug "\nCurrent user identified (#{@current_user.login}), storing to session\n" + "="*50
         cas_store_current_user(@ticket, @current_user)
-        logger.debug "\nTicket_id is in request, should process the old request... #{session[:return_to]}\n" + "="*50
+        logger.debug "\nTicket_id is in request, should process the old request...#{params[CAS_UNIQUE_REQ_KEY]} \n" + "="*50
       end
       def cas_required_roles
         self.class.cas_required_roles if self.class.respond_to? :cas_required_roles 

@@ -7,6 +7,9 @@ require 'rexml/document'
 # Client
 ##################
 module Cassiopeia
+  class CassiopeiaRequest < ActiveRecord::Base
+  end
+
   class Client < Base
     SERVICE_URL = Cassiopeia::CONFIG[:service_url]
     SERVICE_ID = Cassiopeia::CONFIG[:service_id]

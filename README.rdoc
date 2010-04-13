@@ -7,6 +7,7 @@
 - Yet another custom CAS client/server implementation. This plugin allows you to perform single-server authorization between two different rails applications. 
 
 = Changelog:
+- 0.1.0: Multiple requests storing fixed. Workarounds for concurrent requests processing applied.
 - 0.0.9: The bug with multiple concurrent requests processing fixed.
 - 0.0.8: Full request saving support via rack middleware.
 - 0.0.7: Some code for redirection added. Added webpath prefix support.
@@ -35,7 +36,8 @@
   server_url: "https://localhost" # Url of cassiopeia server in your environment
   service_url: "https://localhost/myservice/" # Url of your application (for cas to redirect back)
   service_id: "myservice" # Identification of your service (for informational and security purpose)
-  webpath_prefix: "/myservice" # This is used just for correct redirection if you use proxy (default: empty)
+  requests_save_enabled: true # Set this value to true if you want your application to save and restore the previous request when redirecting to cassiopeia (default: true)
+  
 
 ==== Usage:
 <b>Add this line to application_controller.rb:</b>
@@ -51,6 +53,25 @@ This will raise the Cassiopeia::Exception::AccessDenied if user try to access th
     flash[:notice] = 'Access denied. You dont have permissions to access this page'
     redirect_to root_path
   end
+
+If you set requests_save_enabled to true then you should create the new migration to create 
+the cassiopeia_requests table for storing requests. This is very important if you want to use 
+redirections on the requests that are differ from GET.  So, create this migration: 
+ class AddCassiopeia < ActiveRecord::Migration
+   def self.up
+     create_table :cassiopeia_requests do |t|
+       t.string :uid
+       t.binary :data
+       t.datetime :expires_at
+       t.timestamps
+     end
+   end
+   def self.down
+     drop_table :cassiopeia_requests
+   end
+ end
+
+
 
 === Server configuration
 Create a file named config/cassiopeia.yml:

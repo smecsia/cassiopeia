@@ -10,7 +10,7 @@ PKG_FILES = FileList[ '[a-zA-Z]*',  'lib/**/*' ]
 
 spec = Gem::Specification.new do |s|
   s.name = "cassiopeia"
-  s.version = "0.0.9"
+  s.version = "0.1.0"
   s.author = "smecsia"
   s.email = "smecsia@gmail.com"
   #s.homepage = ""

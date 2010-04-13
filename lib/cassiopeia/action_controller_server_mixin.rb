@@ -3,8 +3,10 @@ module Cassiopeia
 
   module ActionControllerServerMixin
     module ActionControllerMethods
+      private
       def cas_ticket_id
-        params[@ticket_id_key] || session[@ticket_id_key]
+        return session[@ticket_id_key] if (params[@ticket_id_key].nil? || params[@ticket_id_key].empty?)
+        return params[@ticket_id_key]
       end
       def cas_service_url
         params[@service_url_key] || session[@service_url_key]
@@ -51,11 +53,11 @@ module Cassiopeia
       end
 
       def cas_current_ticket_exists?
-        Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id) if cas_ticket_id > ""
+        Cassiopeia::CONFIG[:ticketClass].exists?(cas_ticket_id) 
       end
 
       def cas_current_ticket_valid?
-        logger.debug "\nTicketValid = #{cas_current_ticket.valid_for?(cas_service_id)}\n" + "="*50 if cas_current_ticket_exists?
+        logger.debug("\nTicketValid = #{cas_current_ticket.valid_for?(cas_service_id)}\n" + "="*50) if cas_current_ticket_exists?
         cas_current_ticket.valid_for?(cas_service_id) if cas_current_ticket_exists?
       end
 
@@ -93,22 +95,33 @@ module Cassiopeia
         redirect_to url
       end
 
-      def cas_proceed_auth
-        service_url = Cassiopeia::Server::instance.service_url(session, params)
-        if cas_current_ticket_valid? && current_user
-          logger.debug "\nCurrentTicketValid, current_user exists redirecting to service...\n" + "="*50
-          return cas_redirect_to service_url
-        elsif current_user
-          logger.debug "\nCurrentTicketInvalid, but current_user exists, should create new ticket...\n" + "="*50
-          cas_current_ticket.destroy if cas_current_ticket_exists?
-          cas_create_or_find_ticket
-          return cas_redirect_to service_url
-        elsif cas_current_ticket_exists?
-          logger.debug "\nCurrentTicketInvalid, but current_user exists, destroying ticket, redirecting to login...\n" + "="*50
-          cas_current_ticket.destroy
+      def cas_service_url_build
+        Cassiopeia::Server::instance.service_url(session, params)
+      end
+
+      def cas_proceed_auth        
+        Thread.exclusive do
+          if cas_current_ticket_valid? && current_user
+            logger.debug "\nCurrentTicketValid, current_user exists redirecting to service...\n" + "="*50
+            return cas_redirect_to cas_service_url_build
+          elsif current_user
+            logger.debug "\nCurrentTicketInvalid, but current_user exists, should create new ticket...\n" + "="*50
+            cas_current_ticket.destroy if cas_current_ticket_exists?
+            cas_create_or_find_ticket
+            return cas_redirect_to cas_service_url_build
+          elsif cas_current_ticket_exists?
+            logger.debug "\nCurrentTicketInvalid, but current_user exists, destroying ticket, redirecting to login...\n" + "="*50
+            cas_current_ticket.destroy
+          end
         end
         cas_redirect_to login_url
       end
+
+      def cas_remove_expired_tickets
+        Cassiopeia::CONFIG[:ticketClass].delete_all(:conditions => ["expired_at <= '?'", Time.now.utc])
+      end
+
+      public
 
       def create
         cas_process_request
