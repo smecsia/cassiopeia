@@ -16,7 +16,7 @@ module Cassiopeia
     :format => "js",
     :rack_request_uri_key => "REQUEST_URI",
     :rack_query_string_key => "QUERY_STRING",
-    :rack_save_keys => "REQUEST_METHOD QUERY_STRING REQUEST_URI",
+    :rack_save_keys => "REQUEST_METHOD QUERY_STRING REQUEST_URI RAW_POST_DATA action_controller.request.request_parameters",
     :rack_session_store => "cas_rack_session",
     :rack_session_key => "rack.session",
     :rack_unique_req_key => "cas_req_key",
