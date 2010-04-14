@@ -39,7 +39,7 @@ module Cassiopeia
     end
 
     def restore_headers_required?(env)
-      env[CAS_QUERY_STRING_KEY] && env[CAS_QUERY_STRING_KEY].match(CAS_TICKET_ID_KEY.to_s) && env[CAS_RACK_SESSION_KEY] && env[CAS_RACK_SESSION_KEY][CAS_RACK_SESSION_STORE]
+      env[CAS_QUERY_STRING_KEY] && env[CAS_QUERY_STRING_KEY].match(CAS_TICKET_ID_KEY.to_s) && env[CAS_RACK_SESSION_KEY]
     end
 
     def store_headers_required?(env)

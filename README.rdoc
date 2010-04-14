@@ -7,7 +7,8 @@
 - Yet another custom CAS client/server implementation. This plugin allows you to perform single-server authorization between two different rails applications. 
 
 = Changelog:
-- 0.1.0: Multiple requests storing fixed. Workarounds for concurrent requests processing applied.
+- 0.1.1: Lesser bug with concurrent requests restoring fixed.
+- 0.1.0: Multiple requests storing implemented. Workarounds for concurrent requests processing applied.
 - 0.0.9: The bug with multiple concurrent requests processing fixed.
 - 0.0.8: Full request saving support via rack middleware.
 - 0.0.7: Some code for redirection added. Added webpath prefix support.
@@ -43,7 +44,9 @@
 <b>Add this line to application_controller.rb:</b>
   use_cas_authorization
 
-This will force your application to request authorization from cassiopeia server.
+This will force your application to request authorization from cassiopeia server. This also will add new method "current_user" to your controllers.
+Then you can easily make the helper method to use in your views by adding: 
+  helper_method :current_user
 You can also check required roles to access some controllers. To do this, you should add the following line to your controller:
   cas_require_roles :doctor, :admin
 
@@ -92,8 +95,8 @@ Generate new controller named Cas. Generate new model named CasTicket. Create mi
   end
 Add the following lines to your cas_controller:
   acts_as_cas_controller do |c| 
-    c.ticketClass = CasTicket
-    c.rolesMethod = :roles_array #add this line only if your user model doesn't have :roles method
+    c.ticketClass = CasTicket (default: Ticket)
+    c.rolesMethod = :roles_array #add this line only if your user model doesn't have :roles method (default: roles)
   end
 Add the following lines to your CasTicket:
   acts_as_cas_ticket
