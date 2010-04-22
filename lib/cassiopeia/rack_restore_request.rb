@@ -33,12 +33,14 @@ module Cassiopeia
       begin
         key = restore_req_key(env)
         request = CassiopeiaRequest.find_by_uid(key)
-        stored_keys = Marshal.load(request.data)
-        stored_keys.each do |key,value|
-          if(key.match(CAS_QUERY_STRING_KEY))
-            add_ticket_id_to_req(env,key,value)
-          else
-            env[key] = value
+        if request
+          stored_keys = Marshal.load(request.data)
+          stored_keys.each do |key,value|
+            if(key.match(CAS_QUERY_STRING_KEY))
+              add_ticket_id_to_req(env,key,value)
+            else
+              env[key] = value
+            end
           end
         end
         #FIXME: should we delete this request? But what if user press F5 key?
