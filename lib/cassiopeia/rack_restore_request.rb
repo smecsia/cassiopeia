@@ -41,7 +41,8 @@ module Cassiopeia
             env[key] = value
           end
         end
-        request.delete
+        #FIXME: should we delete this request? But what if user press F5 key?
+        request.delete if CAS_REQ_REMOVE_RETURN
       rescue Exception => e
         raise_missconfiguration(e)
       end

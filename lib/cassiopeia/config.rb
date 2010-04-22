@@ -20,7 +20,8 @@ module Cassiopeia
     :rack_session_store => "cas_rack_session",
     :rack_session_key => "rack.session",
     :rack_unique_req_key => "cas_req_key",
-    :rack_session_store_timeout => 1,
+    :rack_session_store_timeout => 120,
+    :rack_remove_req_after_return => false,
     :rack_session_store_expires_at_key => "cas_req_expires",
     :requests_save_enabled => true
   }

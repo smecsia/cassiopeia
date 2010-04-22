@@ -11,6 +11,7 @@ module Cassiopeia
     CAS_UNIQUE_REQ_KEY = Cassiopeia::CONFIG[:rack_unique_req_key]
     CAS_REQ_EXPIRES_AT_KEY = Cassiopeia::CONFIG[:rack_session_store_expires_at_key]
     CAS_REQ_TIMEOUT = Cassiopeia::CONFIG[:rack_session_store_timeout]
+    CAS_REQ_REMOVE_RETURN = Cassiopeia::CONFIG[:rack_remove_req_after_return]
 
     def session(env)
       env[CAS_RACK_SESSION_KEY]
