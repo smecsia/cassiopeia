@@ -2,8 +2,8 @@ require 'ostruct'
 
 module Cassiopeia
   class User < OpenStruct
-    def to_json
-      table.to_json 
+    def to_json(o)
+      table.to_json(o)
     end
 
     def initialize(hash)
