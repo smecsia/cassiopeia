@@ -75,7 +75,7 @@ module Cassiopeia
         ticket_hash = ticket_hash.merge({:user => user_hash}) if cas_current_ticket.user
         logger.debug "\n Rendering ticket: \n"
         logger.debug ticket_hash.to_json + "\n" + "="*50
-        simple_rest ticket_hash, {:status => :ok}
+        cas_respond ticket_hash, {:status => :ok}
       end
 
       def cas_process_request
@@ -83,7 +83,7 @@ module Cassiopeia
           cas_respond_current_ticket
         else
           @res = {:error => "Ticket not found"}
-          simple_rest @res, {:status => :error}
+          cas_respond @res, {:status => :error}
         end
       end
 
@@ -121,6 +121,15 @@ module Cassiopeia
         Cassiopeia::CONFIG[:ticketClass].delete_all(:conditions => ["expired_at <= '?'", Time.now.utc])
       end
 
+      def cas_respond(data, opts)
+        status= opts[:status] || :ok
+        respond_to do |format|
+          format.js { render :json => data.to_json({}),:status=>status}
+          format.yaml { render :partial=> 'shared/inspect',:content_type =>'text/html',:locals => { :data => data } ,:status=>status }
+          format.xml  { render :xml => data.to_xml({}),:status=>status}
+        end
+      end
+
       public
 
       def create
@@ -137,7 +146,7 @@ module Cassiopeia
 
       def detroy(params)
         cas_current_ticket.destroy if cas_current_ticket_exists?
-        simple_rest nil, {:status => :ok}
+        cas_respond nil, {:status => :ok}
       end
     end
     def acts_as_cas_controller

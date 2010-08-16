@@ -54,6 +54,8 @@ module Cassiopeia
       when Net::HTTPSuccess
         begin
           return ActiveSupport::JSON.decode(res.body).symbolize_keys if Cassiopeia::CONFIG[:format] == "js"
+          return YAML::load(res.body).symbolize_keys if Cassiopeia::CONFIG[:format] == "yaml"
+          return Hash.from_xml(res.body).symbolize_keys if Cassiopeia::CONFIG[:format] == "xml"
         rescue 
         end
       end 

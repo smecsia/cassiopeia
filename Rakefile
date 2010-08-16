@@ -10,7 +10,7 @@ PKG_FILES = FileList[ '[a-zA-Z]*',  'lib/**/*' ]
 
 spec = Gem::Specification.new do |s|
   s.name = "cassiopeia"
-  s.version = "0.1.5"
+  s.version = "0.1.6"
   s.author = "smecsia"
   s.email = "smecsia@gmail.com"
   #s.homepage = ""
@@ -18,7 +18,6 @@ spec = Gem::Specification.new do |s|
   s.summary = "Rails plugin for custom CAS(Cassiopeia) server/client implementation"
   s.add_dependency('uuidtools')
   s.add_dependency('rails', '>=2.3.5')
-  s.add_dependency('simple_rest')
   s.files = PKG_FILES.to_a 
   s.require_path = "lib"
   s.has_rdoc = false
