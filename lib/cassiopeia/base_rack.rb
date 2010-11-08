@@ -1,4 +1,4 @@
-require(File.join(RAILS_ROOT,"config/environment")) unless defined?(Rails)
+require(File.join(Rails.root,"config/environment")) unless defined?(Rails)
 module Cassiopeia
   class BaseRack < Base
     CAS_RACK_SESSION_STORE = Cassiopeia::CONFIG[:rack_session_store] 

@@ -2,6 +2,7 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
+require 'lib/cassiopeia'
 
 desc 'Default: .'
 task :default => :test
@@ -10,7 +11,7 @@ PKG_FILES = FileList[ '[a-zA-Z]*',  'lib/**/*' ]
 
 spec = Gem::Specification.new do |s|
   s.name = "cassiopeia"
-  s.version = "0.1.6"
+  s.version = Cassiopeia::VERSION
   s.author = "smecsia"
   s.email = "smecsia@gmail.com"
   #s.homepage = ""

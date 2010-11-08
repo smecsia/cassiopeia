@@ -25,10 +25,10 @@ module Cassiopeia
     :rack_session_store_expires_at_key => "cas_req_expires",
     :requests_save_enabled => true
   }
-  CONFIG_PATH = "#{RAILS_ROOT}/config/cassiopeia.yml"
+  CONFIG_PATH = "#{Rails.root}/config/cassiopeia.yml"
   @@conf = {}
   if !File.exist?(CONFIG_PATH)
-    raise "Cassiopeia config required! Please, create RAILS_ROOT/conf/cassiopeia.yml file with server/service url"
+    raise "Cassiopeia config required! Please, create #{CONFIG_PATH} file with server/service url"
   end
   @@conf = YAML::load(ERB.new((IO.read(CONFIG_PATH))).result).symbolize_keys if File.exist?(CONFIG_PATH)
   @@ticketClass = Class.class
