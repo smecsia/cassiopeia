@@ -18,7 +18,7 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.summary = "Rails plugin for custom CAS(Cassiopeia) server/client implementation"
   s.add_dependency('uuidtools')
-  s.add_dependency('rails', '>=2.3.5')
+  s.add_dependency('rails', '>=3.0.0')
   s.files = PKG_FILES.to_a 
   s.require_path = "lib"
   s.has_rdoc = false

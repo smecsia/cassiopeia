@@ -7,7 +7,6 @@ module Cassiopeia
   autoload :Exception, 'cassiopeia/base'
   autoload :Server, 'cassiopeia/server'
   autoload :Client, 'cassiopeia/client'
-  autoload :CONFIG, 'cassiopeia/config'
   autoload :ActiveRecordServerMixin, 'cassiopeia/active_record_server_mixin'
   autoload :ActionControllerServerMixin, 'cassiopeia/action_controller_server_mixin'
   autoload :ActionControllerClientMixin, 'cassiopeia/action_controller_client_mixin'
@@ -20,12 +19,7 @@ module Cassiopeia
       ActionController::Base.send :extend, ActionControllerServerMixin
       ActiveRecord::Base.send :extend, ActiveRecordServerMixin
       ActionController::Base.send :extend, ActionControllerClientMixin
-      Rails.configuration.middleware.use RackRestoreRequest if CONFIG[:service_id]
       puts "Cassiopeia #{VERSION} enabled"
     end
   end
-end
-
-if defined? Rails && defined? Rails.root
-  Cassiopeia.enable
 end
