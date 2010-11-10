@@ -1,7 +1,9 @@
 $:.unshift(File.dirname(__FILE__)) unless
 $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
+require "cassiopeia/railtie"
+
 module Cassiopeia
-  VERSION = '0.1.7'
+  VERSION = '0.2.0'
   autoload :User, 'cassiopeia/user'
   autoload :Base, 'cassiopeia/base'
   autoload :Exception, 'cassiopeia/base'
@@ -13,6 +15,7 @@ module Cassiopeia
   autoload :RackRestoreRequest, 'cassiopeia/rack_restore_request'
   autoload :BaseRack, 'cassiopeia/base_rack'
   autoload :CassiopeiaRequest, 'cassiopeia/client'
+  autoload :CONFIG, 'cassiopeia/config'
 
   class << self
     def enable
