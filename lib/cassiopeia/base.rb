@@ -2,7 +2,9 @@ module Cassiopeia
   class Base
     protected
     def query_to_hash(query)
-      CGI.parse(query)
+      h = CGI.parse(query)
+      h.each { |k, v| h[k] = *v }
+      h
     end
 
     def hash_to_query(hash)

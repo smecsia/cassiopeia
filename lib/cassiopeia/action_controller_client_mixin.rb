@@ -22,9 +22,10 @@ module Cassiopeia
         session[CAS_TICKET_ID_KEY] = nil
       end
       def cas_current_ticket_valid?
+        utc = ActiveSupport::TimeZone['UTC']
         logger.debug "\n Ticket.expires_at= #{cas_current_ticket[:expires_at]} \n" + "="*50 if cas_current_ticket
-        logger.debug "\nCurrent ticket valid: #{DateTime.parse(cas_current_ticket[:expires_at])} >= #{DateTime.now}\n" + "="*50 if cas_current_ticket && cas_current_ticket[:expires_at]
-        cas_current_ticket && DateTime.parse(cas_current_ticket[:expires_at]) >= DateTime.now if cas_current_ticket && cas_current_ticket[:expires_at]
+        logger.debug "\nCurrent ticket valid: #{utc.parse(cas_current_ticket[:expires_at])} >= #{Time.now.utc}\n" + "="*50 if cas_current_ticket && cas_current_ticket[:expires_at]
+        cas_current_ticket && utc.parse(cas_current_ticket[:expires_at]) >= Time.now.utc if cas_current_ticket && cas_current_ticket[:expires_at]
       end
       def cas_request_ticket_id
         logger.debug "\nStoring current request:...#{params[CAS_UNIQUE_REQ_KEY]} \n" + "="*50

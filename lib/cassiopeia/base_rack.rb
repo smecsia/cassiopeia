@@ -23,7 +23,7 @@ module Cassiopeia
 
     def cas_current_ticket_valid?(env)
       @ticket = cas_current_ticket(env)
-      @ticket && DateTime.parse(@ticket[:expires_at]) >= DateTime.now if @ticket && @ticket[:expires_at]
+      @ticket && ActiveSupport::TimeZone['UTC'].parse(@ticket[:expires_at]) >= Time.now.utc if @ticket && @ticket[:expires_at]
     end
 
     def enabled
@@ -48,7 +48,7 @@ module Cassiopeia
     end
 
     def generate_expiration
-      DateTime.now() + CAS_REQ_TIMEOUT / 24.0 / 60.0
+      Time.now.utc + CAS_REQ_TIMEOUT / 24.0 / 60.0
     end
 
     def generate_req_key
